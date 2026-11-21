@@ -1,0 +1,841 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "ministryEncPubKey_",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyAcknowledged",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyEscalated",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CommitmentUsed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InstitutionExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InstitutionInactive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCommitment",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSignature",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidStatus",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidWindow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOverdue",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotRegistrar",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotTaskForce",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReportClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SignatureExpired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnknownInstitution",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnknownReport",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint40",
+          "name": "at",
+          "type": "uint40"
+        }
+      ],
+      "name": "Acknowledged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint40",
+          "name": "at",
+          "type": "uint40"
+        }
+      ],
+      "name": "Escalated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "taskForce",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "encPubKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "ackWindow",
+          "type": "uint32"
+        }
+      ],
+      "name": "InstitutionRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "taskForce",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "encPubKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "ackWindow",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "InstitutionUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MinistryKeyUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousRegistrar",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newRegistrar",
+          "type": "address"
+        }
+      ],
+      "name": "RegistrarTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "commitment",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint40",
+          "name": "submittedAt",
+          "type": "uint40"
+        }
+      ],
+      "name": "ReportSubmitted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum SaksiRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint40",
+          "name": "at",
+          "type": "uint40"
+        }
+      ],
+      "name": "StatusChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "ACKNOWLEDGE_TYPEHASH",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DOMAIN_SEPARATOR",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SET_STATUS_TYPEHASH",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        }
+      ],
+      "name": "acknowledge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "acknowledgeBySig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "commitmentUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        }
+      ],
+      "name": "escalate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getInstitution",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "taskForce",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "encPubKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "ackWindow",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "active",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct SaksiRegistry.Institution",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getInstitutionIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "getReport",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "institutionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "commitment",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint40",
+              "name": "submittedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "acknowledgedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "resolvedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "escalatedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "enum SaksiRegistry.Status",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct SaksiRegistry.Report",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "offset",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "getReports",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "institutionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "commitment",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint40",
+              "name": "submittedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "acknowledgedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "resolvedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "uint40",
+              "name": "escalatedAt",
+              "type": "uint40"
+            },
+            {
+              "internalType": "enum SaksiRegistry.Status",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct SaksiRegistry.Report[]",
+          "name": "page",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "isOverdue",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ministryEncPubKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "taskForce",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "encPubKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "ackWindow",
+          "type": "uint32"
+        }
+      ],
+      "name": "registerInstitution",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registrar",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "reportCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setMinistryEncPubKey",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum SaksiRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "setStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum SaksiRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "setStatusBySig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "institutionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "commitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "submitReport",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "reportId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newRegistrar",
+          "type": "address"
+        }
+      ],
+      "name": "transferRegistrar",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "taskForce",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "encPubKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "ackWindow",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "updateInstitution",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161204938038061204983398101604081905261002f916100ac565b600080546001600160a01b03191633908117825560018390556040519091907fed6f22d50c794502c2d865198855205c3c33e21f8cc727a7e442131dcfae88aa908290a36040518181527f28467cd4e1ee4ad06190edfaacf088d35c2a33941d61a3487126dd773125b0bc9060200160405180910390a1506100c5565b6000602082840312156100be57600080fd5b5051919050565b611f75806100d46000396000f3fe608060405234801561001057600080fd5b506004361061014d5760003560e01c8063644ca522116100c3578063baee4b791161007c578063baee4b7914610314578063d22a0d0f14610329578063d32a44811461033c578063d896dd641461034f578063daf9220214610362578063e48b28b41461038957600080fd5b8063644ca522146102885780637a0ed9f91461029b5780637ecebe00146102bb5780639be2baec146102db578063a57d2b82146102ee578063b9a530d21461030157600080fd5b80632b2f45d3116101155780632b2f45d3146102075780633644e5151461021a5780634b5809e1146102225780634e7f9b19146102355780635ea344ec14610255578063641cf0721461027557600080fd5b8063038dcf1414610152578063109467eb14610167578063156428ba146101a1578063185c6f84146101d45780632b20e397146101dc575b600080fd5b61016561016036600461185e565b610392565b005b61018e7fdeff6f5d42de79ffaed5423c301ebecd8a8f56f764e9d7348221d39f5292641581565b6040519081526020015b60405180910390f35b6101c46101af36600461185e565b60026020526000908152604090205460ff1681565b6040519015158152602001610198565b60065461018e565b6000546101ef906001600160a01b031681565b6040516001600160a01b039091168152602001610198565b61016561021536600461185e565b6104b9565b61018e61051f565b61016561023036600461185e565b6105c4565b61024861024336600461185e565b61061d565b6040516101989190611908565b61026861026336600461185e565b6106c2565b6040516101989190611916565b610165610283366004611a2e565b6107de565b61018e610296366004611aa5565b610a02565b6102ae6102a9366004611aa5565b610c71565b6040516101989190611ac7565b61018e6102c9366004611b15565b60036020526000908152604090205481565b6101656102e9366004611b15565b610e35565b6101656102fc366004611b30565b610ee2565b61016561030f366004611b83565b610f94565b61031c6110db565b6040516101989190611be3565b6101c461033736600461185e565b611133565b61016561034a366004611c2a565b611198565b61016561035d366004611c92565b611265565b61018e7f53261f0af0d77400e96e323d59afa2123606200414511a6895cbf4868023beab81565b61018e60015481565b600061039d826112c0565b6002810154909150600160281b900464ffffffffff16156103d1576040516347b9f43760e01b815260040160405180910390fd5b6002810154600160781b900464ffffffffff16156104025760405163020a4d3560e11b815260040160405180910390fd5b805460009081526004602052604090206003015460028201546104329163ffffffff169064ffffffffff16611cd4565b4210156104525760405163f7d8046b60e01b815260040160405180910390fd5b60028101805464ffffffffff60781b1916600160781b4264ffffffffff8116918202929092179092558254604051928352909184907f4c8f272984e12857306a92b04ea092de7b8f18860bf7e7f47f9867379a57579a9060200160405180910390a3505050565b6000546001600160a01b031633146104e457604051632ad9535160e01b815260040160405180910390fd5b60018190556040518181527f28467cd4e1ee4ad06190edfaacf088d35c2a33941d61a3487126dd773125b0bc9060200160405180910390a150565b604080517f8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f60208201527fe4854f30155a20319737ec6339c2e51136fadbf9863dd0fe7a0901b95e9438f5918101919091527fc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc660608201524660808201523060a082015260009060c00160405160208183030381529060405280519060200120905090565b60006105cf826112c0565b80546000908152600460205260409020600101549091506001600160a01b0316331461060e5760405163b38eafbd60e01b815260040160405180910390fd5b61061982823361130d565b5050565b610625611824565b61062e826112c0565b6040805160e0810182528254815260018301546020820152600283015464ffffffffff80821693830193909352600160281b810483166060830152600160501b810483166080830152600160781b810490921660a0820152919060c0830190600160a01b900460ff1660048111156106a8576106a8611877565b60048111156106b9576106b9611877565b90525092915050565b6040805160a08101825260608082526000602083018190529282018390528101829052608081019190915260008281526004602052604090819020815160a0810190925280548290829061071590611ce7565b80601f016020809104026020016040519081016040528092919081815260200182805461074190611ce7565b801561078e5780601f106107635761010080835404028352916020019161078e565b820191906000526020600020905b81548152906001019060200180831161077157829003601f168201915b505050918352505060018201546001600160a01b031660208201526002820154604082015260039091015463ffffffff81166060830152640100000000900460ff16151560809091015292915050565b6000546001600160a01b0316331461080957604051632ad9535160e01b815260040160405180910390fd5b6000868152600460205260409020600101546001600160a01b03161561084257604051630d0058fd60e31b815260040160405180910390fd5b6001600160a01b0383166108695760405163d92e233d60e01b815260040160405180910390fd5b8063ffffffff166000036108905760405163392334ed60e01b815260040160405180910390fd5b6040518060a0016040528086868080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201829052509385525050506001600160a01b038616602080840191909152604080840187905263ffffffff86166060850152600160809094019390935289825260049052208151819061091b9082611d7f565b506020820151600180830180546001600160a01b039093166001600160a01b031990931692909217909155604080840151600284015560608401516003909301805460809095015115156401000000000264ffffffffff1990951663ffffffff90941693909317939093179091556005805491820181556000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db0018790555186907f1723c96e7ac92e93b5d2a8f85e0dce1eafbc7cfd110ec7b8f809daf2075ebab3906109f29088908890889088908890611e3f565b60405180910390a2505050505050565b600082815260046020526040812060018101546001600160a01b0316610a3b5760405163672a171b60e01b815260040160405180910390fd5b6003810154640100000000900460ff16610a68576040516340fcf31560e11b815260040160405180910390fd5b82610a8657604051636033c4fd60e11b815260040160405180910390fd5b60008381526002602052604090205460ff1615610ab657604051637b00071760e01b815260040160405180910390fd5b6000838152600260209081526040808320805460ff1916600190811790915560068054835160e0810185528a815294850189815264ffffffffff4281811696880196875260608801898152608089018a815260a08a018b815260c08b018c8152988701885596909a5288517ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f6003870290810191825594517ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d4086015597517ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d41909401805491519a5196518416600160781b0264ffffffffff60781b19978516600160501b029790971669ffffffffffffffffffff60501b199b8516600160281b0269ffffffffffffffffffff1990931695909416949094171798909816179290921780835592519097509160ff60a01b1916600160a01b836004811115610c1f57610c1f611877565b0217905550506040805186815264ffffffffff8416602082015287925085917f7775ce4c2c6a1180846be3fe5cc2d59f14a854d5ee39a521b132c4e97b22f00c910160405180910390a3505092915050565b600654606090808410610cb8576040805160008082526020820190925290610caf565b610c9c611824565b815260200190600190039081610c945790505b50915050610e2f565b600081610cc58587611cd4565b11610cd957610cd48486611cd4565b610cdb565b815b9050610ce78582611e93565b67ffffffffffffffff811115610cff57610cff611d21565b604051908082528060200260200182016040528015610d3857816020015b610d25611824565b815260200190600190039081610d1d5790505b509250845b81811015610e2b5760068181548110610d5857610d58611ea6565b60009182526020918290206040805160e081018252600390930290910180548352600181015493830193909352600283015464ffffffffff80821692840192909252600160281b810482166060840152600160501b810482166080840152600160781b810490911660a083015290919060c083019060ff600160a01b909104166004811115610de957610de9611877565b6004811115610dfa57610dfa611877565b90525084610e088884611e93565b81518110610e1857610e18611ea6565b6020908102919091010152600101610d3d565b5050505b92915050565b6000546001600160a01b03163314610e6057604051632ad9535160e01b815260040160405180910390fd5b6001600160a01b038116610e875760405163d92e233d60e01b815260040160405180910390fd5b600080546040516001600160a01b03808516939216917fed6f22d50c794502c2d865198855205c3c33e21f8cc727a7e442131dcfae88aa91a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b6000610eed856112c0565b80546000908152600460209081526040808320600101546001600160a01b031680845260038352928190205481517f53261f0af0d77400e96e323d59afa2123606200414511a6895cbf4868023beab9381019390935290820189905260608201526080810187905291925090610f8190829060a0015b60405160208183030381529060405280519060200120878787611349565b610f8c86838361130d565b505050505050565b6000546001600160a01b03163314610fbf57604051632ad9535160e01b815260040160405180910390fd5b600085815260046020526040902060018101546001600160a01b0316610ff85760405163672a171b60e01b815260040160405180910390fd5b6001600160a01b03851661101f5760405163d92e233d60e01b815260040160405180910390fd5b8263ffffffff166000036110465760405163392334ed60e01b815260040160405180910390fd5b6001810180546001600160a01b0319166001600160a01b0387169081179091556002820185905560038201805463ffffffff861664ffffffffff199091168117640100000000861515908102919091179092556040805193845260208401889052830152606082015286907fd76dbbaa825bbd384dca73babcce32623f7c32362391990d88d2d309f89ea91c906080016109f2565b6060600580548060200260200160405190810160405280929190818152602001828054801561112957602002820191906000526020600020905b815481526020019060010190808311611115575b5050505050905090565b60008061113f836112c0565b6002810154909150600160281b900464ffffffffff1615801561119157508054600090815260046020526040902060030154600282015461118d9163ffffffff169064ffffffffff16611cd4565b4210155b9392505050565b60006111a3866112c0565b80546000908152600460208190526040909120600101549192506001600160a01b03909116906112509082907fdeff6f5d42de79ffaed5423c301ebecd8a8f56f764e9d7348221d39f52926415908a908a9081111561120457611204611877565b6001600160a01b038616600090815260036020908152604091829020548251918201959095529081019290925260ff166060820152608081019190915260a0810188905260c001610f63565b61125c87838884611419565b50505050505050565b6000611270836112c0565b80546000908152600460205260409020600101549091506001600160a01b031633146112af5760405163b38eafbd60e01b815260040160405180910390fd5b6112bb83828433611419565b505050565b60065460009082106112e557604051631bcca33160e11b815260040160405180910390fd5b600682815481106112f8576112f8611ea6565b90600052602060002090600302019050919050565b6002820154600160281b900464ffffffffff161561133e576040516347b9f43760e01b815260040160405180910390fd5b6112bb838383611606565b8242111561136a57604051630819bdcd60e01b815260040160405180910390fd5b600061137461051f565b60405161190160f01b6020820152602281019190915260428101869052606201604051602081830303815290604052805190602001209050856001600160a01b03166113c18285856116bc565b6001600160a01b0316146113e857604051638baa579f60e01b815260040160405180910390fd5b6001600160a01b038616600090815260036020526040812080549161140c83611ebc565b9190505550505050505050565b600282600481111561142d5761142d611877565b1415801561144d5750600382600481111561144a5761144a611877565b14155b801561146b5750600482600481111561146857611468611877565b14155b15611489576040516307a92f1960e51b815260040160405180910390fd5b60036002840154600160a01b900460ff1660048111156114ab576114ab611877565b14806114d6575060046002840154600160a01b900460ff1660048111156114d4576114d4611877565b145b156114f45760405163d7b6066760e01b815260040160405180910390fd5b6002830154600160281b900464ffffffffff1660000361151957611519848483611606565b6002830180544291849160ff60a01b1916600160a01b83600481111561154157611541611877565b0217905550600383600481111561155a5761155a611877565b14806115775750600483600481111561157557611575611877565b145b801561159357506002840154600160501b900464ffffffffff16155b156115bb5760028401805464ffffffffff60501b1916600160501b64ffffffffff8416021790555b816001600160a01b0316857f632220b0c3f9e8134a201920e50036bca7e2d973783d895ec78454faf7a0507f85846040516115f7929190611ed5565b60405180910390a35050505050565b60028201805464ffffffffff42908116600160281b0269ffffffffff0000000000199092169190911790915560006002840154600160a01b900460ff16600481111561165457611654611877565b0361166f5760028301805460ff60a01b1916600160a01b1790555b60405164ffffffffff821681526001600160a01b0383169085907fc21dbfc001b9aad47002f4830c264e5b593747542df3cb37bb68baed8231537d9060200160405180910390a350505050565b6000604182146116df57604051638baa579f60e01b815260040160405180910390fd5b60006116ee6020828587611ef7565b6116f791611f21565b90506000611709604060208688611ef7565b61171291611f21565b905060008585604081811061172957611729611ea6565b919091013560f81c9150507f7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a082118061177557508060ff16601b1415801561177557508060ff16601c14155b1561179357604051638baa579f60e01b815260040160405180910390fd5b60408051600081526020810180835289905260ff831691810191909152606081018490526080810183905260019060a0016020604051602081039080840390855afa1580156117e6573d6000803e3d6000fd5b5050604051601f1901519450506001600160a01b03841661181a57604051638baa579f60e01b815260040160405180910390fd5b5050509392505050565b6040805160e081018252600080825260208201819052918101829052606081018290526080810182905260a081018290529060c082015290565b60006020828403121561187057600080fd5b5035919050565b634e487b7160e01b600052602160045260246000fd5b600581106118ab57634e487b7160e01b600052602160045260246000fd5b9052565b8051825260208101516020830152604081015164ffffffffff80821660408501528060608401511660608501528060808401511660808501528060a08401511660a0850152505060c08101516112bb60c084018261188d565b60e08101610e2f82846118af565b60006020808352835160a0602085015280518060c086015260005b8181101561194d5782810184015186820160e001528301611931565b50600085820160e0015260208601516001600160a01b038116604087015292506040860151606086015260608601519250611990608086018463ffffffff169052565b608086015180151560a08701529250601f01601f19169390930160e001949350505050565b60008083601f8401126119c757600080fd5b50813567ffffffffffffffff8111156119df57600080fd5b6020830191508360208285010111156119f757600080fd5b9250929050565b80356001600160a01b0381168114611a1557600080fd5b919050565b803563ffffffff81168114611a1557600080fd5b60008060008060008060a08789031215611a4757600080fd5b86359550602087013567ffffffffffffffff811115611a6557600080fd5b611a7189828a016119b5565b9096509450611a849050604088016119fe565b925060608701359150611a9960808801611a1a565b90509295509295509295565b60008060408385031215611ab857600080fd5b50508035926020909101359150565b6020808252825182820181905260009190848201906040850190845b81811015611b0957611af68385516118af565b9284019260e09290920191600101611ae3565b50909695505050505050565b600060208284031215611b2757600080fd5b611191826119fe565b60008060008060608587031215611b4657600080fd5b8435935060208501359250604085013567ffffffffffffffff811115611b6b57600080fd5b611b77878288016119b5565b95989497509550505050565b600080600080600060a08688031215611b9b57600080fd5b85359450611bab602087016119fe565b935060408601359250611bc060608701611a1a565b915060808601358015158114611bd557600080fd5b809150509295509295909350565b6020808252825182820181905260009190848201906040850190845b81811015611b0957835183529284019291840191600101611bff565b803560058110611a1557600080fd5b600080600080600060808688031215611c4257600080fd5b85359450611c5260208701611c1b565b935060408601359250606086013567ffffffffffffffff811115611c7557600080fd5b611c81888289016119b5565b969995985093965092949392505050565b60008060408385031215611ca557600080fd5b82359150611cb560208401611c1b565b90509250929050565b634e487b7160e01b600052601160045260246000fd5b80820180821115610e2f57610e2f611cbe565b600181811c90821680611cfb57607f821691505b602082108103611d1b57634e487b7160e01b600052602260045260246000fd5b50919050565b634e487b7160e01b600052604160045260246000fd5b601f8211156112bb576000816000526020600020601f850160051c81016020861015611d605750805b601f850160051c820191505b81811015610f8c57828155600101611d6c565b815167ffffffffffffffff811115611d9957611d99611d21565b611dad81611da78454611ce7565b84611d37565b602080601f831160018114611de25760008415611dca5750858301515b600019600386901b1c1916600185901b178555610f8c565b600085815260208120601f198616915b82811015611e1157888601518255948401946001909101908401611df2565b5085821015611e2f5787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b60808152846080820152848660a0830137600060a08683018101919091526001600160a01b03949094166020820152604081019290925263ffffffff166060820152601f909201601f191690910101919050565b81810381811115610e2f57610e2f611cbe565b634e487b7160e01b600052603260045260246000fd5b600060018201611ece57611ece611cbe565b5060010190565b60408101611ee3828561188d565b64ffffffffff831660208301529392505050565b60008085851115611f0757600080fd5b83861115611f1457600080fd5b5050820193919092039150565b80356020831015610e2f57600019602084900360031b1b169291505056fea2646970667358221220d9f38c8c0c9d3da22d4163e89b9120231ffe4193b1d394b5680045b9e6f8297564736f6c63430008180033"
+}
