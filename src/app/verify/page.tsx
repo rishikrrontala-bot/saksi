@@ -66,7 +66,7 @@ function Verify() {
     try {
       const s = await getState();
       setState(s);
-      setOffset(s.now - Math.floor(Date.now() / 1000));
+      setOffset(0); // UI clocks use this device's time; the contract enforces deadlines with block.timestamp
     } catch (e) {
       setError((e as Error).message);
     }

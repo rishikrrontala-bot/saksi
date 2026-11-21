@@ -9,7 +9,10 @@ import { isOverdue } from "@/lib/metrics";
 export function LiveStats() {
   const [s, setS] = useState<ChainState | null>(null);
   useEffect(() => {
-    const load = () => getState().then(setS).catch(() => undefined);
+    const load = () =>
+      getState()
+        .then((st) => setS({ ...st, now: Math.max(st.now, Math.floor(Date.now() / 1000)) }))
+        .catch(() => undefined);
     load();
     const t = setInterval(load, 8000);
     return () => clearInterval(t);

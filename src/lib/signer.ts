@@ -14,9 +14,9 @@ import {
   type WalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { createConfig, http as wagmiHttp } from "wagmi";
+// `injected` comes from wagmi's core export (the wagmi/connectors barrel pulls in optional SDKs we don't use).
+import { createConfig, http as wagmiHttp, injected } from "wagmi";
 import { connect, getWalletClient, switchChain } from "wagmi/actions";
-import { injected } from "wagmi/connectors";
 import { publicClient, registryAbi } from "./chain";
 import { chain, REGISTRY_ADDRESS, RPC_URL } from "./config";
 

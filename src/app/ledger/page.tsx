@@ -16,7 +16,7 @@ export default function LedgerPage() {
     const load = () =>
       getState()
         .then((s) => {
-          setState(s);
+          setState({ ...s, now: Math.max(s.now, Math.floor(Date.now() / 1000)) });
           setUpdated(new Date());
           setError(null);
         })
