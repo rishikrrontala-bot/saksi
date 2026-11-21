@@ -34,7 +34,7 @@ const STATUS_STYLE = [
 export function StatusPill({ status, overdue, escalated }: { status: number; overdue?: boolean; escalated?: boolean }) {
   if (escalated && status <= 1 && overdue !== false)
     return <Pill className="bg-seal text-white">Escalated to ministry</Pill>;
-  if (overdue) return <Pill className="bg-seal-soft text-seal">Overdue — not acknowledged</Pill>;
+  if (overdue) return <Pill className="bg-seal-soft text-seal">Overdue · not acknowledged</Pill>;
   return <Pill className={STATUS_STYLE[status] ?? "bg-line"}>{STATUS_LABELS[status] ?? "Unknown"}</Pill>;
 }
 
@@ -80,7 +80,7 @@ export function Countdown({ until, now }: { until: number; now: number }) {
 }
 
 export function fmtTime(unix: number) {
-  if (!unix) return "—";
+  if (!unix) return "not yet";
   const d = new Date(unix * 1000);
   const local = d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium" });
   const wib = d.toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit" });

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Task-force and ministry signers (proposal §6: "wagmi + viem — wallet signatures for task-force and
+ * Task-force and ministry signers (proposal §6: "wagmi + viem - wallet signatures for task-force and
  * ministry actions"). Either a browser wallet connected through wagmi, or a key held in this browser.
  * acknowledge / setStatus are sent as real transactions from the task force's own wallet.
  */

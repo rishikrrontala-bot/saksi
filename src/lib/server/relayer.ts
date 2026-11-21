@@ -1,6 +1,6 @@
 /**
  * Gas-sponsoring relayer. Reporters and task forces never hold ETH: the relayer submits
- * commitments and the task force's EIP-712 signed actions. It cannot forge either —
+ * commitments and the task force's EIP-712 signed actions. It cannot forge either -
  * the contract checks the task force's signature itself.
  */
 import { BaseError, ContractFunctionRevertedError, createWalletClient, http, type Hex, type TransactionReceipt } from "viem";
@@ -9,7 +9,7 @@ import { publicClient, registryAbi } from "../chain";
 import { chain, REGISTRY_ADDRESS, RPC_URL } from "../config";
 
 const FRIENDLY: Record<string, string> = {
-  NotOverdue: "This report is not overdue yet — the institution's acknowledgement window is still open.",
+  NotOverdue: "This report is not overdue yet: the institution's acknowledgement window is still open.",
   AlreadyAcknowledged: "The task force has already acknowledged this report.",
   AlreadyEscalated: "This report has already been escalated.",
   InvalidSignature: "The signature does not belong to this institution's task force.",
@@ -23,7 +23,7 @@ const FRIENDLY: Record<string, string> = {
 };
 
 export class RelayError extends Error {
-  /** `sentHash` is set when the transaction was broadcast but not confirmed — it may still be mined. */
+  /** `sentHash` is set when the transaction was broadcast but not confirmed - it may still be mined. */
   constructor(message: string, public code?: string, public sentHash?: Hex) {
     super(message);
   }
@@ -66,7 +66,7 @@ export async function relay(functionName: string, args: unknown[]): Promise<{ ha
     try {
       receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 90_000 });
     } catch {
-      throw new RelayError(`Sent (tx ${hash}) but not confirmed yet — it may still be mined.`, "Pending", hash);
+      throw new RelayError(`Sent (tx ${hash}) but not confirmed yet. It may still be mined.`, "Pending", hash);
     }
     if (receipt.status !== "success") throw new RelayError("Transaction reverted on-chain");
     return { hash, receipt };

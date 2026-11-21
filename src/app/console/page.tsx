@@ -5,7 +5,7 @@ import type { Hex } from "viem";
 import { getRecords, getState, post, type ReportPayload, type StoredRecord } from "@/lib/client";
 import type { ChainInstitution, ChainReport, ChainState } from "@/lib/chain";
 import { encKeyFromSignature, fromB64, KEY_DERIVATION_MESSAGE, openReport, unwrapKey, type EncKeyPair } from "@/lib/crypto";
-import { explorerTx } from "@/lib/config";
+import { displayName, explorerTx } from "@/lib/config";
 import { formatDuration, isOverdue } from "@/lib/metrics";
 import { injectedSigner, localSigner, type ConsoleSigner } from "@/lib/signer";
 import { Check, Countdown, ErrorNote, fmtTime, Hash, Pill, SectionTitle, Spinner, StatusPill, useNow } from "@/components/ui";
@@ -127,7 +127,7 @@ export default function ConsolePage() {
   if (!signer || !encKey) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <SectionTitle kicker="Task-force & ministry console" title="Handle reports — on the record">
+        <SectionTitle kicker="Task-force & ministry console" title="Handle reports on the record">
           Task forces decrypt reports in this browser and acknowledge them with on-chain transactions from their own wallet, so
           response times become public. The ministry sees reports that were escalated to it.
         </SectionTitle>
@@ -185,7 +185,7 @@ export default function ConsolePage() {
         <div>
           <p className="label mb-2">{role}</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            {isMinistry ? "Escalated reports" : myInstitutions[0]?.name ?? "This wallet has no role"}
+            {isMinistry ? "Escalated reports" : myInstitutions[0] ? displayName(myInstitutions[0].name) : "This wallet has no role"}
           </h1>
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
             <Hash value={signer.address} head={8} tail={6} /> · {signer.kind === "injected" ? "browser wallet" : "key in this browser"}
@@ -360,7 +360,7 @@ function CaseCard({
             {!p ? null : !p.aiConsent ? (
               <p className="mt-2 text-sm text-muted">The reporter did not consent to AI processing.</p>
             ) : summary ? (
-              <div className="mt-2 space-y-2 text-sm">
+              <div className="rise mt-2 space-y-2 text-sm">
                 <p className="text-ink">{summary.data.anonymizedSummary}</p>
                 <div className="flex flex-wrap gap-1.5">
                   <Pill className="bg-white text-ink-2">urgency: {summary.data.urgency}</Pill>
@@ -438,11 +438,11 @@ function CaseCard({
           )}
           {!canAct && r.escalatedAt > 0 && inst && (
             <p className="text-sm text-ink-2">
-              Escalated {fmtTime(r.escalatedAt)} — {inst.name.split(" — ")[0]} left it unacknowledged for{" "}
+              Escalated {fmtTime(r.escalatedAt)}. {inst.name.split(" \u2014 ")[0]} left it unacknowledged for{" "}
               {formatDuration(r.escalatedAt - r.submittedAt)} (window {formatDuration(inst.ackWindow)}).
             </p>
           )}
-          {err && <p className="rounded-lg bg-seal-soft p-2 text-sm text-seal-dark">{err}</p>}
+          {err && <p className="rise rounded-lg bg-seal-soft p-2 text-sm text-seal-dark">{err}</p>}
         </div>
       </div>
     </article>

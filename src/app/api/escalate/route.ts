@@ -34,7 +34,7 @@ export const POST = handle(async (req) => {
     const res = await relay("escalate", [BigInt(reportId)]); // reverts NotOverdue / AlreadyAcknowledged
     txHash = res.hash;
   }
-  // Only after the contract accepted the escalation does the ministry get a copy of the key —
+  // Only after the contract accepted the escalation does the ministry get a copy of the key -
   // and only once: a leaked receipt can't be used to overwrite it later.
   if (!record.wrapped_ministry) {
     await getStore().setWrappedMinistry(reportId, {

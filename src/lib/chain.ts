@@ -33,7 +33,7 @@ export interface ChainState {
   ministryEncPubKey: Hex;
   institutions: ChainInstitution[];
   reports: ChainReport[];
-  now: number; // latest block timestamp — the contract's notion of "now"
+  now: number; // latest block timestamp - the contract's notion of "now"
   blockNumber: string;
   source?: "events" | "contract"; // events = rebuilt by the indexer; contract = view-function fallback
   eventCount?: number;

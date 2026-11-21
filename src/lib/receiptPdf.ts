@@ -3,11 +3,11 @@
 /**
  * The Sealed Receipt as a PDF + QR (proposal §3 step 5): report ID, transaction hash, the commitment H,
  * the salt and the reporter's copy of the key. The machine-readable receipt is embedded in the PDF's
- * Keywords field, so the verifier can load this same file — one file to keep.
+ * Keywords field, so the verifier can load this same file - one file to keep.
  */
 import { jsPDF } from "jspdf";
 import type { Receipt } from "./client";
-import { CHAIN_NAME, explorerTx } from "./config";
+import { CHAIN_NAME, displayName, explorerTx } from "./config";
 
 const MARKER = "SAKSIRCPT1:";
 
@@ -30,10 +30,10 @@ export function buildReceiptPdf(r: Receipt, qrDataUrl: string, verifyLink: strin
   doc.setFillColor(179, 38, 30);
   doc.circle(L + 12, y - 6, 12, "F");
   doc.setTextColor(255, 255, 255).setFont("helvetica", "bold").setFontSize(13).text("S", L + 8.2, y - 1.5);
-  doc.setTextColor(20, 22, 27).setFontSize(20).text("SAKSI — Sealed Receipt", L + 34, y);
+  doc.setTextColor(20, 22, 27).setFontSize(20).text("SAKSI · Sealed Receipt", L + 34, y);
   y += 22;
   doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(95, 100, 114);
-  doc.text("Proof that this report existed, for this institution, at this time — verifiable without the institution.", L, y);
+  doc.text("Proof that this report existed, for this institution, at this time, verifiable without the institution.", L, y);
   doc.addImage(qrDataUrl, "PNG", 420, 36, 126, 126);
   doc.setFontSize(7.5).text("Scan to verify (reveals no content)", 425, 172);
 
@@ -47,7 +47,7 @@ export function buildReceiptPdf(r: Receipt, qrDataUrl: string, verifyLink: strin
     y += lines.length * (mono ? 11 : 14) + 10;
   };
   row("Report", `#${r.reportId}`);
-  row("Institution", r.institutionName);
+  row("Institution", displayName(r.institutionName));
   const t = new Date(r.submittedAt * 1000);
   row(
     "Anchored at (block timestamp)",
@@ -60,7 +60,7 @@ export function buildReceiptPdf(r: Receipt, qrDataUrl: string, verifyLink: strin
 
   y += 6;
   doc.setDrawColor(179, 38, 30).setLineWidth(1.2).roundedRect(L - 10, y - 14, 515, 128, 6, 6);
-  doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(179, 38, 30).text("PRIVATE — your keys. Anyone holding these can read your report.", L, y + 2);
+  doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(179, 38, 30).text("PRIVATE: your keys. Anyone holding these can read your report.", L, y + 2);
   y += 20;
   row("Salt (opens the fingerprint)", r.salt, true);
   row("Report key (AES-256-GCM, base64)", r.key, true);

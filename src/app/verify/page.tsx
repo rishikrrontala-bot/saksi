@@ -15,7 +15,7 @@ import {
 } from "@/lib/client";
 import type { ChainState } from "@/lib/chain";
 import { computeCommitment, fromB64, openReport, wrapKey } from "@/lib/crypto";
-import { explorerAddress, explorerTx } from "@/lib/config";
+import { displayName, explorerAddress, explorerTx } from "@/lib/config";
 import { formatDuration, isOverdue } from "@/lib/metrics";
 import { Check, Countdown, ErrorNote, fmtTime, Hash, SectionTitle, Spinner, StatusPill, useNow } from "@/components/ui";
 import { receiptFromPdfText } from "@/lib/receiptPdf";
@@ -131,13 +131,13 @@ function Verify() {
         salt: receipt.salt,
         wrappedMinistry,
       });
-      setEscalation({ ok: true, text: "Escalated. The ministry can now decrypt this report — and the institution's missed deadline is public.", tx: res.txHash });
+      setEscalation({ ok: true, text: "Escalated. The ministry can now decrypt this report, and the institution's missed deadline is public.", tx: res.txHash });
       refresh();
     } catch (e) {
       const code = e instanceof ApiError ? e.code : null;
       setEscalation({
         ok: false,
-        text: code ? `Rejected by the smart contract: ${code}() — ${(e as Error).message}` : (e as Error).message,
+        text: code ? `Rejected by the smart contract: ${code}(). ${(e as Error).message}` : (e as Error).message,
       });
     } finally {
       setEscalating(false);
@@ -174,7 +174,7 @@ function Verify() {
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <SectionTitle kicker="Verify a report" title="Check any report against the chain">
           Load a Sealed Receipt to see its status, prove it existed, open it, and escalate it if it&apos;s ignored. The check runs in
-          your browser against public chain data — it doesn&apos;t depend on the institution, or on trusting SAKSI.
+          your browser against public chain data, so it doesn&apos;t depend on the institution, or on trusting SAKSI.
         </SectionTitle>
         <div className="card space-y-4 p-5 sm:p-6">
           <label className="btn-primary cursor-pointer">
@@ -218,7 +218,7 @@ function Verify() {
         <div>
           <p className="label mb-2">{receipt ? "Your report" : "Public verification"}</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Report #{reportId}</h1>
-          <p className="mt-1 text-muted">{inst?.name ?? receipt?.institutionName ?? "…"}</p>
+          <p className="mt-1 text-muted">{displayName(inst?.name ?? receipt?.institutionName ?? "…")}</p>
         </div>
         {onchain && <StatusPill status={onchain.status} overdue={overdue} escalated={onchain.escalatedAt > 0} />}
       </div>
@@ -244,9 +244,9 @@ function Verify() {
                 alert={overdue}
                 title={
                   onchain.acknowledgedAt
-                    ? `Acknowledged after ${formatDuration(onchain.acknowledgedAt - onchain.submittedAt)}${onchain.acknowledgedAt > windowEnd ? " — late" : ""}`
+                    ? `Acknowledged after ${formatDuration(onchain.acknowledgedAt - onchain.submittedAt)}${onchain.acknowledgedAt > windowEnd ? ", late" : ""}`
                     : overdue
-                    ? "Not acknowledged — deadline missed"
+                    ? "Not acknowledged: deadline missed"
                     : "Waiting for the task force to acknowledge"
                 }
                 when={onchain.acknowledgedAt ? fmtTime(onchain.acknowledgedAt) : `Deadline ${fmtTime(windowEnd)}`}
@@ -301,8 +301,8 @@ function Verify() {
                     Tamper test: change one byte of a copy
                   </button>
                   {tamper && (
-                    <ul className="mt-3 space-y-2 text-sm">
-                      <CheckRow s="fail" label={<>Fingerprint becomes <Hash value={tamper.fingerprint} head={10} tail={6} /> — no longer matches</>} />
+                    <ul className="rise mt-3 space-y-2 text-sm">
+                      <CheckRow s="fail" label={<>Fingerprint becomes <Hash value={tamper.fingerprint} head={10} tail={6} />, which no longer matches</>} />
                       <CheckRow s={tamper.decrypts ? "pass" : "fail"} label={tamper.decrypts ? "Still decrypts (unexpected)" : "Decryption refuses the altered bytes"} />
                     </ul>
                   )}
@@ -321,7 +321,7 @@ function Verify() {
                   <>
                     <p className="text-sm text-ink-2">
                       {overdue
-                        ? "The task force missed its deadline. You can now hand this report to the supervising ministry — the contract allows it and nobody can stop it."
+                        ? "The task force missed its deadline. You can now hand this report to the supervising ministry. The contract allows it and nobody can stop it."
                         : `Available once the deadline passes (${fmtTime(windowEnd)}). The contract enforces this, not SAKSI.`}
                     </p>
                     <button className={`${overdue ? "btn-seal" : "btn-ghost"} mt-3 w-full`} onClick={escalate} disabled={!canEscalate || escalating}>
@@ -330,7 +330,7 @@ function Verify() {
                   </>
                 )}
                 {escalation && (
-                  <p className={`mt-3 rounded-lg p-3 text-sm ${escalation.ok ? "bg-ok-soft text-ok" : "bg-seal-soft text-seal-dark"}`}>
+                  <p className={`rise mt-3 rounded-lg p-3 text-sm ${escalation.ok ? "bg-ok-soft text-ok" : "bg-seal-soft text-seal-dark"}`}>
                     {escalation.text}
                     {escalation.tx && (
                       <a className="ml-1 font-mono underline" href={explorerTx(escalation.tx)} target="_blank" rel="noreferrer">
@@ -344,9 +344,9 @@ function Verify() {
           </section>
 
           {plain && (
-            <section className="card p-5 sm:p-6 lg:col-span-2">
+            <section className="rise card p-5 sm:p-6 lg:col-span-2">
               <div className="flex items-center justify-between">
-                <p className="label">Decrypted in this browser — only you see this</p>
+                <p className="label">Decrypted in this browser · only you see this</p>
                 <span className="text-xs text-muted">{plain.structured.category} · {plain.structured.severity}</span>
               </div>
               <p className="mt-3 text-[15px] leading-relaxed text-ink">{plain.structured.summary || plain.narrative}</p>

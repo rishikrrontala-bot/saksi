@@ -1,6 +1,6 @@
 /**
  * Event indexer (proposal §6, data-flow step 8). Rebuilds every institution and report purely from
- * the registry's events — the same computation anyone can repeat against a public RPC.
+ * the registry's events - the same computation anyone can repeat against a public RPC.
  * Incremental: keeps the decoded events in memory and only fetches new blocks on each call.
  */
 import { createPublicClient, fallback, http, type Hex } from "viem";

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getState } from "@/lib/client";
 import type { ChainState } from "@/lib/chain";
-import { explorerAddress, CHAIN_NAME } from "@/lib/config";
+import { displayName, explorerAddress, CHAIN_NAME } from "@/lib/config";
 import { formatDuration, institutionMetrics, isOverdue } from "@/lib/metrics";
 import { ErrorNote, Hash, SectionTitle, Spinner, StatusPill } from "@/components/ui";
 
@@ -46,7 +46,7 @@ export default function LedgerPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SectionTitle kicker="Public accountability ledger" title="How fast does each institution respond?">
-        Every number on this page is computed in your browser from public chain data — report fingerprints, timestamps and the task
+        Every number on this page is computed in your browser from public chain data: report fingerprints, timestamps and the task
         forces&apos; signed actions. No report content is involved, and nobody, including SAKSI or the institutions, can edit it.
       </SectionTitle>
       <ErrorNote error={error} />
@@ -61,7 +61,7 @@ export default function LedgerPage() {
             <Kpi label="Reports anchored" value={String(totals.reports)} note={`across ${totals.institutions} institutions`} />
             <Kpi
               label="Acknowledged on time"
-              value={totals.onTime == null ? "—" : `${Math.round(totals.onTime * 100)}%`}
+              value={totals.onTime == null ? "n/a" : `${Math.round(totals.onTime * 100)}%`}
               note="of reports whose window has closed"
             />
             <Kpi label="Overdue right now" value={String(totals.overdue)} note="deadline missed, no acknowledgement" alert={totals.overdue > 0} />
@@ -88,7 +88,7 @@ export default function LedgerPage() {
                   {metrics.map((m) => (
                     <tr key={m.institution.id} className="border-b border-line last:border-0">
                       <td className="px-4 py-3.5">
-                        <p className="font-medium text-ink">{m.institution.name}</p>
+                        <p className="font-medium text-ink">{displayName(m.institution.name)}</p>
                         <p className="mt-0.5 text-xs text-muted">
                           task force{" "}
                           <a className="font-mono underline decoration-dotted" href={explorerAddress(m.institution.taskForce)} target="_blank" rel="noreferrer">
@@ -99,7 +99,7 @@ export default function LedgerPage() {
                       <td className="px-3 py-3.5 text-muted">{formatDuration(m.institution.ackWindow)}</td>
                       <td className="px-3 py-3.5 text-right tabular-nums">{m.total}</td>
                       <td className="px-3 py-3.5 text-right tabular-nums">
-                        {m.onTimeRate == null ? <span className="text-muted">—</span> : <RateBar rate={m.onTimeRate} />}
+                        {m.onTimeRate == null ? <span className="text-muted">n/a</span> : <RateBar rate={m.onTimeRate} />}
                       </td>
                       <td className="px-3 py-3.5 text-right tabular-nums">{formatDuration(m.medianAckSeconds)}</td>
                       <td className="px-3 py-3.5 text-right tabular-nums">{formatDuration(m.medianResolveSeconds)}</td>
@@ -115,7 +115,7 @@ export default function LedgerPage() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
             <section className="card p-5">
-              <p className="label mb-3">Latest anchored reports — fingerprints only</p>
+              <p className="label mb-3">Latest anchored reports · fingerprints only</p>
               {recent.length === 0 ? (
                 <p className="text-sm text-muted">No reports yet.</p>
               ) : (
@@ -127,7 +127,7 @@ export default function LedgerPage() {
                         <a href={`/verify?id=${r.id}&c=${r.commitment}`} className="w-10 font-mono font-semibold text-ink hover:underline">
                           #{r.id}
                         </a>
-                        <span className="min-w-0 flex-1 truncate text-muted">{inst?.name.split(" — ")[0]}</span>
+                        <span className="min-w-0 flex-1 truncate text-muted">{inst?.name.split(" \u2014 ")[0]}</span>
                         <Hash value={r.commitment} head={8} tail={4} />
                         <span className="w-24 text-right text-xs text-muted">{formatDuration(state.now - r.submittedAt)} ago</span>
                         <StatusPill status={r.status} overdue={isOverdue(r, inst, state.now)} escalated={r.escalatedAt > 0} />

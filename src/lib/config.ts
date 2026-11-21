@@ -3,7 +3,7 @@ import { defineChain, type Hex } from "viem";
 /**
  * Public, build-time config. Everything here is safe to ship to the browser.
  * The proposal targeted Lisk Sepolia (chain 4202), which was wound down in June 2026; the contract
- * is chain-agnostic, so SAKSI runs on Base Sepolia — another OP Stack L2 testnet.
+ * is chain-agnostic, so SAKSI runs on Base Sepolia - another OP Stack L2 testnet.
  */
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 84532);
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "https://sepolia.base.org";
@@ -26,3 +26,6 @@ export const explorerAddress = (addr: string) => `${EXPLORER_URL}/address/${addr
 
 export const STATUS_LABELS = ["Submitted", "Acknowledged", "Investigating", "Resolved", "Referred"] as const;
 export type StatusCode = 0 | 1 | 2 | 3 | 4;
+
+/** On-chain institution names use "Institution - Program"; show them as "Institution · Program". */
+export const displayName = (name: string) => name.replace(/\s+\u2014\s+/g, " · ");

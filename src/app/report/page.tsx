@@ -7,7 +7,7 @@ import { bytesToHex, hexToBytes, type Hex } from "viem";
 import { getState, post, verifyUrl, type Receipt, type ReportPayload } from "@/lib/client";
 import type { ChainState } from "@/lib/chain";
 import { sealReport, toB64, wrapKey } from "@/lib/crypto";
-import { explorerTx } from "@/lib/config";
+import { displayName, explorerTx } from "@/lib/config";
 import { formatDuration } from "@/lib/metrics";
 import { Check, ErrorNote, fmtTime, Hash, Spinner } from "@/components/ui";
 import { buildReceiptPdf } from "@/lib/receiptPdf";
@@ -121,7 +121,7 @@ export default function ReportPage() {
     const steps: SealStep[] = [
       { label: "Encrypting in your browser (AES-256-GCM)", done: false },
       { label: "Computing the fingerprint that goes on-chain", done: false },
-      { label: `Locking the key so only ${inst.name.split(" — ")[0]}'s task force can open it`, done: false },
+      { label: `Locking the key so only ${inst.name.split(" \u2014 ")[0]}'s task force can open it`, done: false },
       { label: "Anchoring on the public chain (gas paid by SAKSI)", done: false },
     ];
     const show = (i: number, detail?: React.ReactNode) => {
@@ -141,7 +141,7 @@ export default function ReportPage() {
         aiModel: aiMeta?.model,
       };
       const sealed = await sealReport(payload);
-      show(0, `${sealed.ciphertext.length} bytes of ciphertext — this is all SAKSI's servers will ever see`);
+      show(0, `${sealed.ciphertext.length} bytes of ciphertext. This is all SAKSI's servers will ever see`);
       show(1, <Hash value={sealed.commitment} head={18} tail={10} />);
       const wrappedTf = await wrapKey(sealed.key, hexToBytes(inst.encPubKey));
       show(2, "X25519 key agreement → HKDF → AES-GCM key wrap");
@@ -184,7 +184,7 @@ export default function ReportPage() {
   }
 
   function downloadPdf(r: Receipt, qrUrl: string) {
-    const deadline = inst ? fmtTime(r.submittedAt + inst.ackWindow) : "—";
+    const deadline = inst ? fmtTime(r.submittedAt + inst.ackWindow) : "n/a";
     buildReceiptPdf(r, qrUrl, verifyUrl(window.location.origin, r.reportId, r.commitment), deadline).save(`saksi-receipt-${r.reportId}.pdf`);
   }
 
@@ -213,7 +213,7 @@ export default function ReportPage() {
           <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Say what happened. Keep the proof.</h1>
           <p className="mt-3 text-[15px] leading-relaxed text-muted">
             No account, no wallet, no name. Your report is encrypted on this device before it leaves it. You walk away with a receipt
-            that proves it existed — and when — without anyone&apos;s cooperation.
+            that proves it existed, and when, without anyone&apos;s cooperation.
           </p>
           <ol className="no-print mt-8 mb-6 flex gap-2 text-xs font-semibold">
             {["Where", "What happened", "Seal"].map((l, i) => (
@@ -234,7 +234,7 @@ export default function ReportPage() {
         <ErrorNote error={error} />
 
         {step === 1 && (
-          <section className="card space-y-5 p-5 sm:p-6">
+          <section className="rise card space-y-5 p-5 sm:p-6">
             <div>
               <label className="label" htmlFor="inst">
                 Institution
@@ -247,7 +247,7 @@ export default function ReportPage() {
                 <select id="inst" className="field mt-2" value={institutionId} onChange={(e) => setInstitutionId(e.target.value as Hex)}>
                   {activeInstitutions.map((i) => (
                     <option key={i.id} value={i.id}>
-                      {i.name}
+                      {displayName(i.name)}
                     </option>
                   ))}
                 </select>
@@ -277,7 +277,7 @@ export default function ReportPage() {
                 </button>
               </div>
               <p className="mt-2 text-xs text-muted">
-                Codes are handed out in bulk to every student or resident. They prove &ldquo;I belong to this institution&rdquo; — not
+                Codes are handed out in bulk to every student or resident. They prove &ldquo;I belong to this institution&rdquo;, not
                 who you are. Each works once.
               </p>
             </div>
@@ -290,7 +290,7 @@ export default function ReportPage() {
         )}
 
         {step === 2 && (
-          <section className="card space-y-5 p-5 sm:p-6">
+          <section className="rise card space-y-5 p-5 sm:p-6">
             <div>
               <div className="flex items-end justify-between gap-2">
                 <label className="label" htmlFor="narr">
@@ -344,9 +344,9 @@ export default function ReportPage() {
             )}
 
             {structured && (
-              <div className="space-y-4 border-t border-line pt-5">
+              <div className="rise space-y-4 border-t border-line pt-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="label">Structured case — review and edit anything</p>
+                  <p className="label">Structured case · review and edit anything</p>
                   {aiMeta && (
                     <span className="font-mono text-[11px] text-muted">
                       {aiMeta.model} · {(aiMeta.ms / 1000).toFixed(1)}s
@@ -408,7 +408,7 @@ export default function ReportPage() {
                         <li key={m}>{m}</li>
                       ))}
                     </ul>
-                    <p className="mt-1 text-xs text-muted">Add anything you can to your story above, or leave it — it&apos;s your call.</p>
+                    <p className="mt-1 text-xs text-muted">Add anything you can to your story above, or leave it. It&apos;s your call.</p>
                   </div>
                 )}
               </div>
@@ -425,15 +425,15 @@ export default function ReportPage() {
         )}
 
         {step === 3 && inst && structured && (
-          <section className="card space-y-5 p-5 sm:p-6">
+          <section className="rise card space-y-5 p-5 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-3">
-              <Fact k="Goes to" v={inst.name} />
+              <Fact k="Goes to" v={displayName(inst.name)} />
               <Fact k="Category" v={`${structured.category} · ${structured.severity}`} />
               <Fact k="Must be acknowledged within" v={formatDuration(inst.ackWindow)} />
             </div>
             <ul className="space-y-2 text-sm text-ink-2">
               <li>• Your words are encrypted here, in this browser. SAKSI&apos;s servers only ever store ciphertext.</li>
-              <li>• Only a fingerprint (a hash) and a timestamp go on the public chain — never content, never your identity.</li>
+              <li>• Only a fingerprint (a hash) and a timestamp go on the public chain. Never content, never your identity.</li>
               <li>• Only this institution&apos;s task force can decrypt it. If they ignore it, you can hand it to the ministry.</li>
             </ul>
             {sealing.length > 0 && (
@@ -441,7 +441,7 @@ export default function ReportPage() {
                 {sealing.map((s, i) => {
                   const running = !s.done && (i === 0 || sealing[i - 1].done);
                   return (
-                    <li key={s.label} className="flex gap-3 text-sm">
+                    <li key={s.label} className="rise flex gap-3 text-sm">
                       <span
                         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                           s.done ? "bg-ok text-white" : running ? "text-ink" : "text-line"
@@ -470,18 +470,18 @@ export default function ReportPage() {
         )}
 
         {step === 4 && receipt && (
-          <section className="space-y-6">
+          <section className="rise space-y-6">
             <div className="print-card card relative overflow-hidden p-6 sm:p-8">
               <div className="stamp pointer-events-none absolute right-5 top-5 hidden rounded-full border-4 border-seal px-4 py-2 font-display text-lg font-bold uppercase tracking-widest text-seal sm:block">
                 Sealed
               </div>
               <p className="label">Sealed Receipt · SAKSI</p>
               <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">Report #{receipt.reportId}</h1>
-              <p className="mt-1 text-muted">{receipt.institutionName}</p>
+              <p className="mt-1 text-muted">{displayName(receipt.institutionName)}</p>
               <div className="mt-6 grid gap-6 sm:grid-cols-[1fr_auto]">
                 <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
                   <Fact k="Anchored at (block time)" v={fmtTime(receipt.submittedAt)} />
-                  <Fact k="Acknowledge by" v={inst ? fmtTime(receipt.submittedAt + inst.ackWindow) : "—"} />
+                  <Fact k="Acknowledge by" v={inst ? fmtTime(receipt.submittedAt + inst.ackWindow) : "n/a"} />
                   <Fact k="Fingerprint (on-chain)" v={<Hash value={receipt.commitment} head={14} tail={8} />} />
                   <Fact
                     k="Transaction"
@@ -496,7 +496,7 @@ export default function ReportPage() {
                   <figure className="text-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={qr} alt="QR code linking to the public verification page" className="mx-auto h-40 w-40 rounded-lg border border-line" />
-                    <figcaption className="mt-1 text-[11px] text-muted">Scan to verify — reveals nothing</figcaption>
+                    <figcaption className="mt-1 text-[11px] text-muted">Scan to verify. Reveals nothing.</figcaption>
                   </figure>
                 )}
               </div>
@@ -546,7 +546,7 @@ function Field({
               ✓ from your words: &ldquo;{check.quote.length > 48 ? check.quote.slice(0, 48) + "…" : check.quote}&rdquo;
             </span>
           ) : (
-            <span className="text-[11px] font-semibold text-warn">⚠ not found in your text — please check</span>
+            <span className="text-[11px] font-semibold text-warn">⚠ not found in your text, please check</span>
           ))}
       </span>
       {children}

@@ -39,7 +39,7 @@ async function aesKey(raw: Uint8Array, usages: KeyUsage[]) {
 }
 
 export interface SealedReport {
-  key: Uint8Array; // 32-byte AES key — only the reporter (receipt) and wrapped copies hold it
+  key: Uint8Array; // 32-byte AES key - only the reporter (receipt) and wrapped copies hold it
   iv: Uint8Array;
   ciphertext: Uint8Array;
   salt: Uint8Array; // stays in the receipt; proves the receipt holder can open the commitment
@@ -113,7 +113,7 @@ export interface EncKeyPair {
 
 /**
  * ECDSA signatures are deterministic (RFC 6979), so the same wallet always derives the same key.
- * The signature is therefore as sensitive as a private key: SAKSI never logs, stores or transmits it —
+ * The signature is therefore as sensitive as a private key: SAKSI never logs, stores or transmits it -
  * it lives only in this tab's memory. (Hardware-wallet or HSM-held keys are the production path.)
  */
 export function encKeyFromSignature(signature: Hex): EncKeyPair {
