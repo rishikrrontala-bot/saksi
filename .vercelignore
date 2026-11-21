@@ -1,0 +1,11 @@
+# Only the Next.js app is deployed; the contract toolchain and local artifacts stay local.
+contracts/node_modules
+contracts/artifacts
+contracts/cache
+contracts/lib
+contracts/out
+.next
+.next-build
+.data
+demo
+deployments/31337.json
