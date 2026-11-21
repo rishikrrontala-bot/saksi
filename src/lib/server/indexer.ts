@@ -3,12 +3,20 @@
  * the registry's events — the same computation anyone can repeat against a public RPC.
  * Incremental: keeps the decoded events in memory and only fetches new blocks on each call.
  */
-import type { Hex } from "viem";
+import { createPublicClient, fallback, http, type Hex } from "viem";
 import { publicClient, readChainState, registryAbi, type ChainInstitution, type ChainReport, type ChainState } from "../chain";
 import { chain, REGISTRY_ADDRESS } from "../config";
 
-const CHUNK = 5_000n;
+const CHUNK = 45_000n;
 const DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_DEPLOY_BLOCK || process.env.DEPLOY_BLOCK || "0");
+
+// Base's own public RPC caps eth_getLogs at 200 blocks, so logs come from public RPCs that allow
+// wide ranges (first that answers wins). Local chains use the normal client.
+const INDEXER_RPCS = (
+  process.env.INDEXER_RPC_URLS || "https://base-sepolia-rpc.publicnode.com,https://base-sepolia.gateway.tenderly.co"
+).split(",");
+const logsClient =
+  chain.id === 84532 ? createPublicClient({ chain, transport: fallback(INDEXER_RPCS.map((u) => http(u.trim()))) }) : publicClient;
 
 type Ev = { eventName: string; args: Record<string, unknown>; blockNumber: bigint; logIndex: number };
 
@@ -23,7 +31,7 @@ async function catchUp(latest: bigint) {
   }
   const batches = await Promise.all(
     ranges.map(([fromBlock, toBlock]) =>
-      publicClient.getContractEvents({ address: REGISTRY_ADDRESS, abi: registryAbi, fromBlock, toBlock })
+      logsClient.getContractEvents({ address: REGISTRY_ADDRESS, abi: registryAbi, fromBlock, toBlock })
     )
   );
   for (const batch of batches) {
@@ -121,10 +129,22 @@ export type IndexedState = ChainState & { source: "events" | "contract"; eventCo
 export async function indexedChainState(): Promise<IndexedState> {
   if (!REGISTRY_ADDRESS) throw new Error("Registry address not configured (NEXT_PUBLIC_REGISTRY_ADDRESS)");
   try {
-    const block = await publicClient.getBlock();
-    if (!running) running = catchUp(block.number).finally(() => (running = null));
-    await running;
+    const [block, logsHead, count] = await Promise.all([
+      publicClient.getBlock(),
+      logsClient.getBlockNumber(),
+      publicClient.readContract({ address: REGISTRY_ADDRESS, abi: registryAbi, functionName: "reportCount" }) as Promise<bigint>,
+    ]);
+    // Never ask the log RPC for blocks past its own head.
+    const target = logsHead < block.number ? logsHead : block.number;
+    if (target > indexedTo) {
+      if (!running) running = catchUp(target).finally(() => (running = null));
+      await running;
+    }
     const folded = fold();
+    if (folded.reports.length < Number(count)) {
+      // The log RPC is a block or two behind a just-mined report: answer from the contract this time.
+      return { ...(await readChainState()), source: "contract" };
+    }
     return { ...folded, now: Number(block.timestamp), blockNumber: block.number.toString(), source: "events", indexedBlock: indexedTo.toString() };
   } catch (e) {
     // Fallback: read the same facts straight from the contract's view functions.

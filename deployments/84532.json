@@ -1,0 +1,35 @@
+{
+  "chainId": 84532,
+  "address": "0x5ccf07245d652380b1d13f6a72dc351389648150",
+  "deployTx": "0xf51b6dbc4b3dcad0ed34823ee6d84396a05010fb0708f7c40b8dea682a442816",
+  "deployBlock": "61825065",
+  "registrar": "0x83867018C698f98d57e4ad54FDBd131643740847",
+  "relayer": "0x77C7c2E258C6f5147b951eE27B64eF1C2835e0C1",
+  "ministryEncPubKey": "0x567d9215e8b3aae1e122e0d9941375b7caad300ed4891e64488dd70dfc79b63f",
+  "institutions": [
+    {
+      "slug": "RSP-NUSANTARA-ANES",
+      "name": "RS Pendidikan Nusantara — PPDS Anestesiologi (demo)",
+      "window": 180,
+      "id": "0x163e9274febe42c29b7d35065dc221b2ec8205e4bdd547f7c9a580363634c064",
+      "taskForce": "0xE500e23220cd91516Fef363F9ffc81cD2C2bA6fa",
+      "encPubKey": "0x7a3000035be32f70faf40195ba94ad80ab06a0fe96dfad002bba278dd63f0d4e"
+    },
+    {
+      "slug": "UMP-FK",
+      "name": "Universitas Merah Putih — Fakultas Kedokteran (demo)",
+      "window": 300,
+      "id": "0xa0319656db9548cf73f4b66dff4a6d8cc00df1bf5c8abde8d25dce5002150a42",
+      "taskForce": "0x0814756F8331c1bbC55Be5Bcbc8D389026Af9A4B",
+      "encPubKey": "0xaa76a112d9c298cd89dd29a2b7aa2df9180fbab3ee49719c5a93f80c0fbebd5b"
+    },
+    {
+      "slug": "RSUD-HARAPAN-BANGSA",
+      "name": "RSUD Harapan Bangsa — Komite Etik (demo)",
+      "window": 604800,
+      "id": "0x2707d55c9a3a52617794e6ad6b8ea07ab47c3f550d65b8524aa5ea6125646968",
+      "taskForce": "0xd4ccFA032318E61376E2B0f22CB9B2199D0B54d0",
+      "encPubKey": "0x3e5208064a4bda3a6217f35907c9d4fc5353439d529b2ae2ffca0b0173c3ad74"
+    }
+  ]
+}
