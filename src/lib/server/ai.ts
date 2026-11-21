@@ -36,8 +36,27 @@ export const IntakeSchema = z.object({
   requestedOutcome: str,
   missingInfo: strList,
   immediateDanger: z.boolean().catch(false),
+  quotes: z.record(z.string(), z.string()).catch({}),
 });
 export type Intake = z.infer<typeof IntakeSchema>;
+
+export const QUOTED_FIELDS = ["what", "when", "where", "who", "requestedOutcome"] as const;
+const norm = (s: string) => s.toLowerCase().replace(/[“”"'’`]/g, "").replace(/\s+/g, " ").trim();
+
+/**
+ * Source-quotation check: every structured field must be backed by a verbatim quote from the
+ * reporter's own narrative. Fields whose quote is missing or not found are flagged for review.
+ */
+export function checkQuotes(intake: Intake, narrative: string) {
+  const hay = norm(narrative);
+  const out: Record<string, { quote: string; found: boolean }> = {};
+  for (const f of QUOTED_FIELDS) {
+    if (!intake[f]) continue;
+    const quote = (intake.quotes?.[f] ?? "").trim();
+    out[f] = { quote, found: quote.length >= 3 && hay.includes(norm(quote)) };
+  }
+  return out;
+}
 
 export const SummarySchema = z.object({
   anonymizedSummary: str,
@@ -59,7 +78,7 @@ function extractJson(text: string): unknown {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-export async function chatJson<T>(schema: z.ZodType<T>, system: string, user: string): Promise<{ data: T; model: string; ms: number }> {
+export async function chatJson<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, system: string, user: string): Promise<{ data: T; model: string; ms: number }> {
   const key = process.env.FEATHERLESS_API_KEY;
   if (!key) throw new Error("AI is not configured");
   let lastError = "No model answered";
@@ -114,6 +133,7 @@ Return ONLY a JSON object with these keys:
 - "requestedOutcome": what the reporter wants to happen; "" if not stated
 - "missingInfo": up to 3 short questions that would make this report actionable for an investigator, only for details that are genuinely missing
 - "immediateDanger": true only if the text suggests risk of self-harm or ongoing physical danger
+- "quotes": an object with keys "what", "when", "where", "who", "requestedOutcome". For each field you filled, give the shortest EXACT phrase (3-15 words, copied character for character from the narrative, in its original language) that supports it. Use "" for fields you left empty.
 
 Never add facts that are not in the narrative.`;
 

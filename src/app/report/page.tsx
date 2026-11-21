@@ -58,6 +58,7 @@ export default function ReportPage() {
   const [missing, setMissing] = useState<string[]>([]);
   const [danger, setDanger] = useState(false);
   const [structured, setStructured] = useState<Structured | null>(null);
+  const [quoteChecks, setQuoteChecks] = useState<Record<string, { quote: string; found: boolean }>>({});
 
   const [sealing, setSealing] = useState<SealStep[]>([]);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
@@ -93,11 +94,15 @@ export default function ReportPage() {
     setAiBusy(true);
     setError(null);
     try {
-      const res = await post<{ intake: Structured & { missingInfo: string[]; immediateDanger: boolean }; model: string; ms: number }>(
-        "/api/ai/intake",
-        { narrative }
-      );
-      const { missingInfo, immediateDanger, ...rest } = res.intake;
+      const res = await post<{
+        intake: Structured & { missingInfo: string[]; immediateDanger: boolean; quotes?: Record<string, string> };
+        quoteChecks: Record<string, { quote: string; found: boolean }>;
+        model: string;
+        ms: number;
+      }>("/api/ai/intake", { narrative });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { missingInfo, immediateDanger, quotes, ...rest } = res.intake;
+      setQuoteChecks(res.quoteChecks ?? {});
       setStructured({ ...EMPTY, ...rest });
       setMissing(missingInfo ?? []);
       setDanger(!!immediateDanger);
@@ -367,17 +372,17 @@ export default function ReportPage() {
                 <Field label="Summary (roles, not names)">
                   <textarea className="field min-h-20" value={structured.summary} onChange={(e) => setStructured({ ...structured, summary: e.target.value })} />
                 </Field>
-                <Field label="What happened">
+                <Field label="What happened" check={quoteChecks.what}>
                   <textarea className="field min-h-16" value={structured.what} onChange={(e) => setStructured({ ...structured, what: e.target.value })} />
                 </Field>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <Field label="When">
+                  <Field label="When" check={quoteChecks.when}>
                     <input className="field" value={structured.when} onChange={(e) => setStructured({ ...structured, when: e.target.value })} />
                   </Field>
-                  <Field label="Where">
+                  <Field label="Where" check={quoteChecks.where}>
                     <input className="field" value={structured.where} onChange={(e) => setStructured({ ...structured, where: e.target.value })} />
                   </Field>
-                  <Field label="Who (roles)">
+                  <Field label="Who (roles)" check={quoteChecks.who}>
                     <input className="field" value={structured.who} onChange={(e) => setStructured({ ...structured, who: e.target.value })} />
                   </Field>
                 </div>
@@ -388,7 +393,7 @@ export default function ReportPage() {
                     onChange={(e) => setStructured({ ...structured, evidence: e.target.value.split("\n") })}
                   />
                 </Field>
-                <Field label="What you want to happen">
+                <Field label="What you want to happen" check={quoteChecks.requestedOutcome}>
                   <input
                     className="field"
                     value={structured.requestedOutcome}
@@ -522,10 +527,28 @@ export default function ReportPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+  check,
+}: {
+  label: string;
+  children: React.ReactNode;
+  check?: { quote: string; found: boolean };
+}) {
   return (
     <label className="block">
-      <span className="label mb-1.5 block">{label}</span>
+      <span className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-2">
+        <span className="label">{label}</span>
+        {check &&
+          (check.found ? (
+            <span className="text-[11px] text-ok" title="The AI quoted this from your own words">
+              ✓ from your words: &ldquo;{check.quote.length > 48 ? check.quote.slice(0, 48) + "…" : check.quote}&rdquo;
+            </span>
+          ) : (
+            <span className="text-[11px] font-semibold text-warn">⚠ not found in your text — please check</span>
+          ))}
+      </span>
       {children}
     </label>
   );

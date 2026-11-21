@@ -99,7 +99,7 @@ async function main() {
     let aiModel: string | undefined;
     try {
       const ai = await post<{ intake: Record<string, unknown>; model: string }>("/api/ai/intake", { narrative: c.narrative });
-      const { missingInfo: _m, immediateDanger: _d, ...rest } = ai.intake;
+      const { missingInfo: _m, immediateDanger: _d, quotes: _q, ...rest } = ai.intake;
       structured = rest;
       aiModel = ai.model;
     } catch {
