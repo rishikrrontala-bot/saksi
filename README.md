@@ -4,8 +4,8 @@
 
 Built for **COMPSPHERE 12 — International Web3 Hackathon** (team *rrr*). All demo institutions and cases are fictional.
 
-- **Live app:** _added at deployment_
-- **Contract:** `SaksiRegistry` on Base Sepolia — _address added at deployment_ ([why not Lisk Sepolia?](#chain))
+- **Live app:** https://saksi-compsphere.vercel.app
+- **Contract:** `SaksiRegistry` on Base Sepolia — [`0x5ccf07245d652380b1d13f6a72dc351389648150`](https://base-sepolia.blockscout.com/address/0x5ccf07245d652380b1d13f6a72dc351389648150) ([why not Lisk Sepolia?](#chain)) · deployment record: [`deployments/84532.json`](deployments/84532.json)
 
 ## The four MVP features (as proposed)
 
@@ -70,6 +70,12 @@ The adversary is whoever operates the database — today, the institution being 
 The contract also accepts EIP-712 signed variants (`acknowledgeBySig`, `setStatusBySig`) as a gasless option for institutions without test ETH; the app itself uses direct wallet transactions.
 
 Demo institutions use shortened windows (3 and 5 minutes) so the escalation rule can be shown live; the third uses the production 7-day window. The UI always shows each institution's window.
+
+## Tests
+
+- `cd contracts && npx hardhat test` — 15 tests (registrar rights, replay protection, the time lock, closing rules, pagination), all passing.
+- `contracts/test/SaksiRegistry.t.sol` — the same suite for **Foundry** plus a fuzz test that escalation is impossible before the deadline (`forge test` in `contracts/`). It is included for parity with the proposal's tooling; it was not executed during the final because Foundry could not be installed on the build machine in time.
+- End-to-end: report → AI intake → seal → anchor → receipt → tamper test → early escalation rejected by the contract → escalation → ministry decrypt → late acknowledgement → ledger, run locally and on Base Sepolia (`scripts/seed.ts`, `scripts/escalate.ts`).
 
 ## Run it locally
 
