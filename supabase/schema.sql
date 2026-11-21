@@ -22,3 +22,6 @@ create table if not exists access_codes (
 -- Row-level security on, no policies: only the server's service key can read or write.
 alter table reports enable row level security;
 alter table access_codes enable row level security;
+
+-- Newer Supabase projects don't grant table access to the API roles automatically.
+grant select, insert, update, delete on public.reports, public.access_codes to service_role;
