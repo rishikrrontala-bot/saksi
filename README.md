@@ -1,20 +1,20 @@
-# SAKSI — reports the institution can't bury
+# SAKSI: reports the institution can't bury
 
-**SAKSI** (Indonesian for *witness*; *Saluran Aduan Kekerasan yang Sah & Independen*) is an anonymous, tamper-evident reporting rail for bullying, extortion, harassment and other violence at universities and teaching hospitals. A student or medical resident files a report from any browser — no account, no wallet, no name. The report is **encrypted in the browser**; only a **fingerprint and a timestamp** are anchored on a public chain. The reporter keeps a **Sealed Receipt (PDF + QR)** that proves the report existed, and when, without the institution's cooperation. The institution's task force must acknowledge it with an **on-chain, wallet-signed transaction**, so response times become public data; a report ignored past its window can be **escalated to the ministry** by the reporter, with the deadline enforced by the contract.
+**SAKSI** (Indonesian for *witness*; *Saluran Aduan Kekerasan yang Sah & Independen*) is an anonymous, tamper-evident reporting rail for bullying, extortion, harassment and other violence at universities and teaching hospitals. A student or medical resident files a report from any browser with no account, no wallet and no name. The report is **encrypted in the browser**; only a **fingerprint and a timestamp** are anchored on a public chain. The reporter keeps a **Sealed Receipt (PDF + QR)** that proves the report existed, and when, without the institution's cooperation. The institution's task force must acknowledge it with an **on-chain, wallet-signed transaction**, so response times become public data; a report ignored past its window can be **escalated to the ministry** by the reporter, with the deadline enforced by the contract.
 
-Built for **COMPSPHERE 12 — International Web3 Hackathon** (team *rrr*). All demo institutions and cases are fictional.
+Built for **COMPSPHERE 12 International Web3 Hackathon** (team *rrr*). All demo institutions and cases are fictional.
 
 - **Live app:** https://saksi-compsphere.vercel.app
-- **Contract:** `SaksiRegistry` on Base Sepolia — [`0x5ccf07245d652380b1d13f6a72dc351389648150`](https://base-sepolia.blockscout.com/address/0x5ccf07245d652380b1d13f6a72dc351389648150) ([why not Lisk Sepolia?](#chain)) · deployment record: [`deployments/84532.json`](deployments/84532.json)
+- **Contract:** `SaksiRegistry` on Base Sepolia: [`0x5ccf07245d652380b1d13f6a72dc351389648150`](https://base-sepolia.blockscout.com/address/0x5ccf07245d652380b1d13f6a72dc351389648150) ([why not Lisk Sepolia?](#chain)) · deployment record: [`deployments/84532.json`](deployments/84532.json)
 
 ## The four MVP features (as proposed)
 
 | # | Feature | Where |
 |---|---|---|
-| F1 | **Sealed Report Submission** — one-time access code → AI-guided intake → AES-256-GCM in the browser → commitment anchored by a gas-sponsored relayer → Sealed Receipt (PDF + QR) with explorer link | `/report` |
-| F2 | **Task-Force Console** — wallet sign-in, in-browser decryption, AI anonymized summary and category, `acknowledge` / `setStatus` transactions signed by the task force's wallet | `/console` |
-| F3 | **Public Accountability Ledger** — per-institution reports, % acknowledged on time, median time to acknowledge / resolve, overdue, escalated — computed from chain events by an indexer | `/ledger` |
-| F4 | **Verify & Escalate** — load a receipt → on-chain match, ciphertext integrity, one-byte tamper test; after the window, one click re-wraps the key for the ministry and calls `escalate` (early attempts are rejected by the contract) | `/verify` |
+| F1 | **Sealed Report Submission**: one-time access code → AI-guided intake → AES-256-GCM in the browser → commitment anchored by a gas-sponsored relayer → Sealed Receipt (PDF + QR) with explorer link | `/report` |
+| F2 | **Task-Force Console**: wallet sign-in, in-browser decryption, AI anonymized summary and category, `acknowledge` / `setStatus` transactions signed by the task force's wallet | `/console` |
+| F3 | **Public Accountability Ledger**: per-institution reports, % acknowledged on time, median time to acknowledge / resolve, overdue and escalated, computed from chain events by an indexer | `/ledger` |
+| F4 | **Verify & Escalate**: load a receipt → on-chain match, ciphertext integrity, one-byte tamper test; after the window, one click re-wraps the key for the ministry and calls `escalate` (early attempts are rejected by the contract) | `/verify` |
 
 ## How a report flows
 
@@ -43,28 +43,28 @@ Browser (Next.js 15 + WebCrypto)            Next.js API routes (Vercel)         
 |---|---|
 | Frontend | Next.js 15 (React 19, TypeScript), Tailwind CSS 4, WebCrypto, `qrcode`, `jspdf` |
 | Wallet / chain client | wagmi (browser wallet) + viem |
-| Smart contract | Solidity 0.8.24 — `contracts/src/SaksiRegistry.sol` |
+| Smart contract | Solidity 0.8.24: `contracts/src/SaksiRegistry.sol` |
 | Chain | Base Sepolia (chain 84532), explorer `base-sepolia.blockscout.com` |
 | Backend | Next.js API routes: relayer (viem wallet client), event indexer, AI endpoints |
-| Database | Supabase (PostgreSQL) — `supabase/schema.sql`; RLS on, service key only |
+| Database | Supabase (PostgreSQL): `supabase/schema.sql`; RLS on, service key only |
 | AI | Featherless.ai OpenAI-compatible API, open-weight Qwen3 / DeepSeek, JSON validated with zod |
 
 ### <a id="chain"></a>Why Base Sepolia and not Lisk Sepolia
 
-The proposal targeted Lisk Sepolia (chain 4202) and stated the contract is chain-agnostic ("any EVM L2"). Lisk Sepolia was wound down in June 2026 — its RPC hostname no longer resolves and its explorer is offline — so SAKSI is deployed, unchanged, to **Base Sepolia**, another OP Stack L2 testnet.
+The proposal targeted Lisk Sepolia (chain 4202) and stated the contract is chain-agnostic ("any EVM L2"). Lisk Sepolia was wound down in June 2026 (its RPC hostname no longer resolves and its explorer is offline), so SAKSI is deployed, unchanged, to **Base Sepolia**, another OP Stack L2 testnet.
 
 ### Why a blockchain and not a database
 
-The adversary is whoever operates the database — today, the institution being reported. SAKSI needs an append-only timestamp no institution can alter or backdate, verification by any third party without trusting SAKSI, and receipts that still verify if SAKSI disappears. Only hashes, IDs and timestamps go on-chain; personal data lives only in erasable off-chain ciphertext.
+The adversary is whoever operates the database: today, the institution being reported. SAKSI needs an append-only timestamp no institution can alter or backdate, verification by any third party without trusting SAKSI, and receipts that still verify if SAKSI disappears. Only hashes, IDs and timestamps go on-chain; personal data lives only in erasable off-chain ciphertext.
 
 ## Smart contract
 
 `SaksiRegistry` ([spec](contracts/SPEC.md)):
 
-- `registerInstitution(id, name, taskForce, encPubKey, ackWindow)` / `updateInstitution(...)` — registrar (ministry) only; key rotation never rewrites history
-- `submitReport(institutionId, commitment) → reportId` — anyone (the relayer in practice)
-- `acknowledge(reportId)`, `setStatus(reportId, Investigating|Resolved|Referred)` — the institution's task-force wallet only
-- `escalate(reportId)` — anyone, only if unacknowledged and `block.timestamp ≥ submittedAt + ackWindow`
+- `registerInstitution(id, name, taskForce, encPubKey, ackWindow)` / `updateInstitution(...)`: registrar (ministry) only; key rotation never rewrites history
+- `submitReport(institutionId, commitment) → reportId`: anyone (the relayer in practice)
+- `acknowledge(reportId)`, `setStatus(reportId, Investigating|Resolved|Referred)`: the institution's task-force wallet only
+- `escalate(reportId)`: anyone, only if unacknowledged and `block.timestamp ≥ submittedAt + ackWindow`
 - Views: `getReport`, `getReports(offset, limit)`, `getInstitution`, `getInstitutionIds`, `isOverdue`, `reportCount`
 
 The contract also accepts EIP-712 signed variants (`acknowledgeBySig`, `setStatusBySig`) as a gasless option for institutions without test ETH; the app itself uses direct wallet transactions.
@@ -73,8 +73,8 @@ Demo institutions use shortened windows (3 and 5 minutes) so the escalation rule
 
 ## Tests
 
-- `cd contracts && npx hardhat test` — 15 tests (registrar rights, replay protection, the time lock, closing rules, pagination), all passing.
-- `contracts/test/SaksiRegistry.t.sol` — the same suite for **Foundry** plus a fuzz test that escalation is impossible before the deadline (`forge test` in `contracts/`). It is included for parity with the proposal's tooling; it was not executed during the final because Foundry could not be installed on the build machine in time.
+- `cd contracts && npx hardhat test`: 15 tests (registrar rights, replay protection, the time lock, closing rules, pagination), all passing.
+- `contracts/test/SaksiRegistry.t.sol`: the same suite for **Foundry** plus a fuzz test that escalation is impossible before the deadline (`forge test` in `contracts/`). It is included for parity with the proposal's tooling; it was not executed during the final because Foundry could not be installed on the build machine in time.
 - End-to-end: report → AI intake → seal → anchor → receipt → tamper test → early escalation rejected by the contract → escalation → ministry decrypt → late acknowledgement → ledger, run locally and on Base Sepolia (`scripts/seed.ts`, `scripts/escalate.ts`).
 
 ## Run it locally

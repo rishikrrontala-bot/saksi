@@ -1,4 +1,4 @@
-# SaksiRegistry — contract spec (source of truth for the app's ABI)
+# SaksiRegistry: contract spec (source of truth for the app's ABI)
 
 Solidity ^0.8.24, Foundry. No OpenZeppelin: minimal inline EIP-712 + `ecrecover`.
 On-chain data per report: two 32-byte hashes, four timestamps, a status byte. **No content, no names, no IPs.**
@@ -29,27 +29,27 @@ struct Report {
 
 ## State
 
-- `address public registrar` — the ministry; `msg.sender` in the constructor
-- `bytes32 public ministryEncPubKey` — constructor argument
+- `address public registrar`: the ministry; `msg.sender` in the constructor
+- `bytes32 public ministryEncPubKey`: constructor argument
 - `mapping(bytes32 => bool) public commitmentUsed`
-- `mapping(address => uint256) public nonces` — per task-force signer, for EIP-712
+- `mapping(address => uint256) public nonces`: per task-force signer, for EIP-712
 - internal: institutions mapping, institution id list, `Report[]`
 
 ## Functions
 
 Registrar only (`NotRegistrar`):
-- `registerInstitution(bytes32 id, string name, address taskForce, bytes32 encPubKey, uint32 ackWindow)` — reverts `InstitutionExists`, `ZeroAddress`, `InvalidWindow` (0), `InvalidKey` (zero key). Emits `InstitutionRegistered`.
-- `updateInstitution(bytes32 id, address taskForce, bytes32 encPubKey, uint32 ackWindow, bool active)` — key rotation / deactivation. Emits `InstitutionUpdated`.
-- `setMinistryEncPubKey(bytes32 key)` — reverts `InvalidKey` for a zero key (also checked in the constructor). Emits `MinistryKeyUpdated`.
-- `transferRegistrar(address newRegistrar)` — emits `RegistrarTransferred`.
+- `registerInstitution(bytes32 id, string name, address taskForce, bytes32 encPubKey, uint32 ackWindow)`: reverts `InstitutionExists`, `ZeroAddress`, `InvalidWindow` (0), `InvalidKey` (zero key). Emits `InstitutionRegistered`.
+- `updateInstitution(bytes32 id, address taskForce, bytes32 encPubKey, uint32 ackWindow, bool active)`: key rotation / deactivation. Emits `InstitutionUpdated`.
+- `setMinistryEncPubKey(bytes32 key)`: reverts `InvalidKey` for a zero key (also checked in the constructor). Emits `MinistryKeyUpdated`.
+- `transferRegistrar(address newRegistrar)`: emits `RegistrarTransferred`.
 
 Anyone (in practice the gas-sponsoring relayer):
-- `submitReport(bytes32 institutionId, bytes32 commitment) returns (uint256 reportId)` — institution must exist (`UnknownInstitution`) and be active (`InstitutionInactive`); commitment non-zero (`InvalidCommitment`) and unused (`CommitmentUsed`). `reportId` = index in the reports array, starting at 0. Emits `ReportSubmitted`.
-- `escalate(uint256 reportId)` — only if `acknowledgedAt == 0` (`AlreadyAcknowledged`), not escalated (`AlreadyEscalated`), and `block.timestamp >= submittedAt + ackWindow` (`NotOverdue`). Sets `escalatedAt`. Emits `Escalated`. A task force may still acknowledge after escalation (the late ack is recorded).
+- `submitReport(bytes32 institutionId, bytes32 commitment) returns (uint256 reportId)`: institution must exist (`UnknownInstitution`) and be active (`InstitutionInactive`); commitment non-zero (`InvalidCommitment`) and unused (`CommitmentUsed`). `reportId` = index in the reports array, starting at 0. Emits `ReportSubmitted`.
+- `escalate(uint256 reportId)`: only if `acknowledgedAt == 0` (`AlreadyAcknowledged`), not escalated (`AlreadyEscalated`), and `block.timestamp >= submittedAt + ackWindow` (`NotOverdue`). Sets `escalatedAt`. Emits `Escalated`. A task force may still acknowledge after escalation (the late ack is recorded).
 
-Task force of the report's institution — direct call (`NotTaskForce`) or gasless EIP-712 signature submitted by anyone:
-- `acknowledge(uint256 reportId)` / `acknowledgeBySig(uint256 reportId, uint256 deadline, bytes signature)` — sets `acknowledgedAt`, status `Submitted → Acknowledged`. Reverts `AlreadyAcknowledged`. Emits `Acknowledged`.
-- `setStatus(uint256 reportId, Status status)` / `setStatusBySig(uint256 reportId, Status status, uint256 deadline, bytes signature)` — `status ∈ {Investigating, Resolved, Referred}` else `InvalidStatus`; reverts `ReportClosed` if current status is Resolved or Referred; implicitly acknowledges first if `acknowledgedAt == 0` (emits `Acknowledged` too); sets `resolvedAt` when moving to Resolved/Referred. Emits `StatusChanged`.
+Task force of the report's institution: direct call (`NotTaskForce`) or gasless EIP-712 signature submitted by anyone:
+- `acknowledge(uint256 reportId)` / `acknowledgeBySig(uint256 reportId, uint256 deadline, bytes signature)`: sets `acknowledgedAt`, status `Submitted → Acknowledged`. Reverts `AlreadyAcknowledged`. Emits `Acknowledged`.
+- `setStatus(uint256 reportId, Status status)` / `setStatusBySig(uint256 reportId, Status status, uint256 deadline, bytes signature)`: `status ∈ {Investigating, Resolved, Referred}` else `InvalidStatus`; reverts `ReportClosed` if current status is Resolved or Referred; implicitly acknowledges first if `acknowledgedAt == 0` (emits `Acknowledged` too); sets `resolvedAt` when moving to Resolved/Referred. Emits `StatusChanged`.
 
 All report functions revert `UnknownReport` for an out-of-range id.
 
@@ -67,7 +67,7 @@ All report functions revert `UnknownReport` for an out-of-range id.
 - `getReports(uint256 offset, uint256 limit) → Report[]` (clamped to the end; empty if offset ≥ count)
 - `getInstitution(bytes32 id) → Institution`
 - `getInstitutionIds() → bytes32[]`
-- `isOverdue(uint256 id) → bool` — `acknowledgedAt == 0 && block.timestamp >= submittedAt + ackWindow`
+- `isOverdue(uint256 id) → bool`: `acknowledgedAt == 0 && block.timestamp >= submittedAt + ackWindow`
 
 ## Events
 
