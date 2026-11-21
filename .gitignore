@@ -44,3 +44,6 @@ next-env.d.ts
 .data/
 .claude/
 deployments/31337.json
+demo/receipts/
+DEMO-KEYS.local.md
+.next-build/
