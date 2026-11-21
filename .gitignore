@@ -47,3 +47,4 @@ deployments/31337.json
 demo/receipts/
 DEMO-KEYS.local.md
 .next-build/
+!.env.example
