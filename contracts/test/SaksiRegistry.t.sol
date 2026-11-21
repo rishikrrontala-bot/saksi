@@ -72,6 +72,10 @@ contract SaksiRegistryTest is Test {
         reg.registerInstitution(keccak256("Z"), "Z", address(0), bytes32(0), WEEK);
         vm.expectRevert(SaksiRegistry.InvalidWindow.selector);
         reg.registerInstitution(keccak256("Z"), "Z", tf, bytes32(0), 0);
+        vm.expectRevert(SaksiRegistry.InvalidKey.selector);
+        reg.registerInstitution(keccak256("Z"), "Z", tf, bytes32(0), WEEK);
+        vm.expectRevert(SaksiRegistry.InvalidKey.selector);
+        reg.setMinistryEncPubKey(bytes32(0));
 
         SaksiRegistry.Institution memory inst = reg.getInstitution(RSUP);
         assertEq(inst.name, "RSUP Demo Hospital");

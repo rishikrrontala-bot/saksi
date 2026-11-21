@@ -38,9 +38,9 @@ struct Report {
 ## Functions
 
 Registrar only (`NotRegistrar`):
-- `registerInstitution(bytes32 id, string name, address taskForce, bytes32 encPubKey, uint32 ackWindow)` — reverts `InstitutionExists`, `ZeroAddress`, `InvalidWindow` (0). Emits `InstitutionRegistered`.
+- `registerInstitution(bytes32 id, string name, address taskForce, bytes32 encPubKey, uint32 ackWindow)` — reverts `InstitutionExists`, `ZeroAddress`, `InvalidWindow` (0), `InvalidKey` (zero key). Emits `InstitutionRegistered`.
 - `updateInstitution(bytes32 id, address taskForce, bytes32 encPubKey, uint32 ackWindow, bool active)` — key rotation / deactivation. Emits `InstitutionUpdated`.
-- `setMinistryEncPubKey(bytes32 key)` — emits `MinistryKeyUpdated`.
+- `setMinistryEncPubKey(bytes32 key)` — reverts `InvalidKey` for a zero key (also checked in the constructor). Emits `MinistryKeyUpdated`.
 - `transferRegistrar(address newRegistrar)` — emits `RegistrarTransferred`.
 
 Anyone (in practice the gas-sponsoring relayer):

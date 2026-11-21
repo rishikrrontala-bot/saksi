@@ -83,6 +83,8 @@ describe("SaksiRegistry", () => {
         "ZeroAddress"
       );
       await expectRevert(registry.write.registerInstitution([id("Z"), "Z", taskForce.address, h(1), 0]), "InvalidWindow");
+      await expectRevert(registry.write.registerInstitution([id("Z"), "Z", taskForce.address, h(0), WEEK]), "InvalidKey");
+      await expectRevert(registry.write.setMinistryEncPubKey([h(0)]), "InvalidKey");
       const inst = await registry.read.getInstitution([RSUP]);
       assert.equal(inst.name, "RSUP Demo Hospital");
       assert.equal(inst.taskForce, taskForce.address);

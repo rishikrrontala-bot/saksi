@@ -74,6 +74,7 @@ contract SaksiRegistry {
     error NotTaskForce();
     error ZeroAddress();
     error InvalidWindow();
+    error InvalidKey();
     error UnknownInstitution();
     error InstitutionInactive();
     error InstitutionExists();
@@ -94,6 +95,7 @@ contract SaksiRegistry {
     }
 
     constructor(bytes32 ministryEncPubKey_) {
+        if (ministryEncPubKey_ == bytes32(0)) revert InvalidKey();
         registrar = msg.sender;
         ministryEncPubKey = ministryEncPubKey_;
         emit RegistrarTransferred(address(0), msg.sender);
@@ -112,6 +114,7 @@ contract SaksiRegistry {
         if (_institutions[id].taskForce != address(0)) revert InstitutionExists();
         if (taskForce == address(0)) revert ZeroAddress();
         if (ackWindow == 0) revert InvalidWindow();
+        if (encPubKey == bytes32(0)) revert InvalidKey(); // a zero X25519 key would make wrapped keys public
         _institutions[id] = Institution(name, taskForce, encPubKey, ackWindow, true);
         _institutionIds.push(id);
         emit InstitutionRegistered(id, name, taskForce, encPubKey, ackWindow);
@@ -127,6 +130,7 @@ contract SaksiRegistry {
         if (inst.taskForce == address(0)) revert UnknownInstitution();
         if (taskForce == address(0)) revert ZeroAddress();
         if (ackWindow == 0) revert InvalidWindow();
+        if (encPubKey == bytes32(0)) revert InvalidKey();
         inst.taskForce = taskForce;
         inst.encPubKey = encPubKey;
         inst.ackWindow = ackWindow;
@@ -135,6 +139,7 @@ contract SaksiRegistry {
     }
 
     function setMinistryEncPubKey(bytes32 key) external onlyRegistrar {
+        if (key == bytes32(0)) revert InvalidKey();
         ministryEncPubKey = key;
         emit MinistryKeyUpdated(key);
     }

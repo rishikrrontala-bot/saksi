@@ -111,7 +111,11 @@ export interface EncKeyPair {
   pubHex: Hex; // bytes32 as registered on-chain
 }
 
-/** ECDSA signatures are deterministic (RFC 6979), so the same wallet always derives the same key. */
+/**
+ * ECDSA signatures are deterministic (RFC 6979), so the same wallet always derives the same key.
+ * The signature is therefore as sensitive as a private key: SAKSI never logs, stores or transmits it —
+ * it lives only in this tab's memory. (Hardware-wallet or HSM-held keys are the production path.)
+ */
 export function encKeyFromSignature(signature: Hex): EncKeyPair {
   const priv = hexToBytes(keccak256(signature));
   const pub = x25519.getPublicKey(priv);

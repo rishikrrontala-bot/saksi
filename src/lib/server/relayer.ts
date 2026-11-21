@@ -23,7 +23,8 @@ const FRIENDLY: Record<string, string> = {
 };
 
 export class RelayError extends Error {
-  constructor(message: string, public code?: string) {
+  /** `sentHash` is set when the transaction was broadcast but not confirmed — it may still be mined. */
+  constructor(message: string, public code?: string, public sentHash?: Hex) {
     super(message);
   }
 }
@@ -39,8 +40,10 @@ let queue: Promise<unknown> = Promise.resolve();
 export async function relay(functionName: string, args: unknown[]): Promise<{ hash: Hex; receipt: TransactionReceipt }> {
   const account = relayerAccount();
   const wallet = createWalletClient({ account, chain, transport: http(RPC_URL) });
-  // Serialise sends (not confirmations) so concurrent requests don't reuse a nonce.
-  const send = queue.then(async () => {
+  // One transaction at a time, send AND confirmation, so each simulation sees the previous
+  // transaction's effects and concurrent requests never reuse a nonce.
+  const run = queue.then(async () => {
+    let hash: Hex;
     try {
       const { request } = await publicClient.simulateContract({
         account,
@@ -49,7 +52,7 @@ export async function relay(functionName: string, args: unknown[]): Promise<{ ha
         functionName,
         args,
       });
-      return await wallet.writeContract(request);
+      hash = await wallet.writeContract(request);
     } catch (e) {
       if (e instanceof BaseError) {
         const revert = e.walk((x) => x instanceof ContractFunctionRevertedError) as ContractFunctionRevertedError | null;
@@ -59,12 +62,17 @@ export async function relay(functionName: string, args: unknown[]): Promise<{ ha
       }
       throw e;
     }
+    let receipt: TransactionReceipt;
+    try {
+      receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 90_000 });
+    } catch {
+      throw new RelayError(`Sent (tx ${hash}) but not confirmed yet — it may still be mined.`, "Pending", hash);
+    }
+    if (receipt.status !== "success") throw new RelayError("Transaction reverted on-chain");
+    return { hash, receipt };
   });
-  queue = send.catch(() => undefined);
-  const hash = await send;
-  const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 90_000 });
-  if (receipt.status !== "success") throw new RelayError("Transaction reverted on-chain");
-  return { hash, receipt };
+  queue = run.catch(() => undefined);
+  return run;
 }
 
 export const relayerAddress = () => relayerAccount().address;

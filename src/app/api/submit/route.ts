@@ -1,7 +1,7 @@
 import { decodeEventLog, type Hex } from "viem";
 import { registryAbi } from "@/lib/chain";
 import { chainState, codeHash, fail, handle, invalidateChainState, isHex32, ok } from "@/lib/server/http";
-import { relay } from "@/lib/server/relayer";
+import { relay, RelayError } from "@/lib/server/relayer";
 import { getStore } from "@/lib/server/store";
 
 export const dynamic = "force-dynamic";
@@ -48,8 +48,12 @@ export const POST = handle(async (req) => {
   try {
     result = await relay("submitReport", [institutionId as Hex, commitment as Hex]);
   } catch (e) {
-    await store.remove(commitment.toLowerCase());
-    await store.releaseCode(h);
+    // Only undo if nothing reached the chain. A broadcast-but-unconfirmed tx may still be mined,
+    // so its sealed ciphertext must stay in storage.
+    if (!(e instanceof RelayError && e.sentHash)) {
+      await store.remove(commitment.toLowerCase());
+      await store.releaseCode(h);
+    }
     throw e;
   }
 
