@@ -9,6 +9,7 @@ import { getState } from "@/lib/client";
 import type { ChainState } from "@/lib/chain";
 import { CHAIN_NAME, STATUS_LABELS } from "@/lib/config";
 import { formatDuration, isOverdue } from "@/lib/metrics";
+import { Envelope, IconAnchor, IconEscalate, IconRespond, IconSeal, WaxSeal } from "@/components/brand";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -64,6 +65,48 @@ export function HeroShot() {
       </div>
     </div>
   );
+}
+
+/** The deck's envelope and wax seal: the envelope rises in, then the seal presses down (no bounce). */
+export function HeroEnvelope() {
+  const ref = useRef<HTMLDivElement>(null);
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        const tl = gsap.timeline({ delay: 0.2 });
+        tl.from(".hero-env", { y: 50, opacity: 0, rotate: -2, duration: 1, ease: EASE_OUT })
+          .from(".hero-seal", { scale: 1.35, y: -40, opacity: 0, rotate: -18, duration: 0.55, ease: "power3.out" }, "-=0.35")
+          .from(".hero-seal-shadow", { opacity: 0, scale: 0.6, duration: 0.4, ease: EASE_OUT }, "<0.25");
+        gsap.to(ref.current, {
+          yPercent: -10,
+          ease: "none",
+          scrollTrigger: { trigger: ref.current, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+    },
+    { scope: ref }
+  );
+  return (
+    <div ref={ref} className="pointer-events-none relative mx-auto w-full max-w-xl lg:absolute lg:bottom-10 lg:right-[2%] lg:w-[42%] lg:max-w-none">
+      <div className="hero-env relative rotate-[-3deg]">
+        <Envelope className="h-auto w-full" />
+        <div className="absolute left-1/2 top-[52%] w-[34%] -translate-x-1/2 -translate-y-1/2">
+          <span className="hero-seal-shadow absolute inset-[12%] rounded-full bg-[#5a0d08]/25 blur-xl" />
+          <WaxSeal priority className="hero-seal relative h-auto w-full rotate-[-6deg]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A thin red line under the nav that tracks how far you've read. Transform only. */
+export function ScrollProgress() {
+  const ref = useRef<HTMLDivElement>(null);
+  useGSAP(() => {
+    gsap.fromTo(ref.current, { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
+  });
+  return <div ref={ref} aria-hidden className="fixed inset-x-0 top-0 z-50 h-[3px] origin-left bg-seal" style={{ transform: "scaleX(0)" }} />;
 }
 
 /* ------------------------------------------------------------------ live marquee */
@@ -149,18 +192,22 @@ export function LiveRegistryCard() {
 
 const STEPS = [
   {
+    icon: IconSeal,
     title: "Seal",
     body: "Write what happened. An optional open-weight AI helps structure it, quoting your own words. Your browser encrypts it with AES-256-GCM, so SAKSI only ever stores ciphertext.",
   },
   {
+    icon: IconAnchor,
     title: "Anchor",
     body: "A fingerprint of the sealed report goes on a public chain with a block timestamp. You keep a Sealed Receipt (PDF + QR) that proves it existed, and when.",
   },
   {
+    icon: IconRespond,
     title: "Respond",
     body: "The institution's task force decrypts it in its own browser and must acknowledge it with a wallet-signed transaction. Response times become public.",
   },
   {
+    icon: IconEscalate,
     title: "Escalate",
     body: "No acknowledgement inside the window? One click hands the report to the ministry. The contract enforces the deadline, not the institution and not SAKSI.",
   },
@@ -184,7 +231,16 @@ export function StepsAccordion() {
               active ? "border-ink bg-ink text-paper lg:grow-[3.2]" : "border-line bg-card text-ink hover:border-ink/40 lg:grow"
             }`}
           >
-            <h3 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{s.title}</h3>
+            <div>
+              <span
+                className={`mb-6 flex h-16 w-16 items-center justify-center rounded-full border transition-colors duration-300 ${
+                  active ? "border-paper/20 bg-paper/10 text-paper" : "border-line bg-paper text-ink"
+                }`}
+              >
+                <s.icon className="h-9 w-9" />
+              </span>
+              <h3 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{s.title}</h3>
+            </div>
             <p
               className={`mt-6 max-w-md text-[15px] leading-relaxed transition-opacity duration-300 lg:mt-0 ${
                 active ? "text-paper/80 opacity-100 delay-150" : "text-muted lg:opacity-0"
@@ -246,7 +302,7 @@ export function StackedShots() {
         <div key={s.src} className="stack-card sticky pb-10" style={{ top: `${96 + i * 22}px` }}>
           <article className="stack-inner group grid origin-top gap-8 overflow-hidden rounded-[32px] border border-line bg-card p-5 shadow-[0_40px_80px_-50px_rgba(20,22,27,0.5)] sm:p-8 lg:grid-cols-[1fr_1.5fr] lg:items-center">
             <div className="px-2 sm:px-4">
-              <h3 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{s.title}</h3>
+                <h3 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{s.title}</h3>
               <p className="mt-4 max-w-sm text-[16px] leading-relaxed text-muted">{s.body}</p>
             </div>
             <div className="overflow-hidden rounded-[20px] border border-line">

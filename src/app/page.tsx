@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CHAIN_NAME } from "@/lib/config";
-import { ChainMarquee, HeroShot, LiveRegistryCard, Reveal, ScrubText, StackedShots, StepsAccordion } from "@/components/home/HomeClient";
+import { ChainMarquee, HeroEnvelope, LiveRegistryCard, Reveal, ScrollProgress, ScrubText, StackedShots, StepsAccordion } from "@/components/home/HomeClient";
+import { WaxSeal } from "@/components/brand";
 
 const FACTS = [
   {
@@ -29,6 +30,7 @@ const WHY =
 export default function Home() {
   return (
     <>
+      <ScrollProgress />
       {/* Attention */}
       <section className="relative mx-auto max-w-7xl px-4 pb-24 pt-20 sm:px-8 sm:pt-28 lg:min-h-[86vh] lg:pb-56">
         <Reveal>
@@ -51,7 +53,7 @@ export default function Home() {
           </Link>
         </Reveal>
         <div className="mt-16 lg:mt-0">
-          <HeroShot />
+          <HeroEnvelope />
         </div>
       </section>
 
@@ -121,6 +123,7 @@ export default function Home() {
       <section className="px-3 pb-3 sm:px-6 sm:pb-6">
         <div className="relative overflow-hidden rounded-[36px] bg-forest px-6 py-28 text-paper sm:px-16 md:py-40">
           <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-seal/30 blur-[120px]" />
+          <WaxSeal className="absolute -bottom-8 right-6 hidden w-44 rotate-[8deg] md:block lg:right-16 lg:w-56" />
           <h2 className="relative max-w-5xl font-display text-[clamp(2.6rem,6vw,5.6rem)] font-semibold leading-[1] tracking-[-0.03em]">
             A report deserves a record. <span className="text-[#ff8f80]">Keep yours.</span>
           </h2>

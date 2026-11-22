@@ -11,6 +11,7 @@ import { displayName, explorerTx } from "@/lib/config";
 import { formatDuration } from "@/lib/metrics";
 import { Check, ErrorNote, fmtTime, Hash, Spinner } from "@/components/ui";
 import { buildReceiptPdf } from "@/lib/receiptPdf";
+import { WaxSeal } from "@/components/brand";
 
 const CATEGORIES = [
   "Bullying",
@@ -472,8 +473,8 @@ export default function ReportPage() {
         {step === 4 && receipt && (
           <section className="rise space-y-6">
             <div className="print-card card relative overflow-hidden p-6 sm:p-8">
-              <div className="stamp pointer-events-none absolute right-5 top-5 hidden rounded-full border-4 border-seal px-4 py-2 font-display text-lg font-bold uppercase tracking-widest text-seal sm:block">
-                Sealed
+              <div className="stamp pointer-events-none absolute right-6 top-4 hidden w-32 sm:block">
+                <WaxSeal priority className="h-auto w-full" />
               </div>
               <p className="label">Sealed Receipt · SAKSI</p>
               <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">Report #{receipt.reportId}</h1>
